@@ -54,33 +54,89 @@
      The decision rule is worth a point on its own and it's the thing most
      people leave out. Every taxonomy has a hardest boundary. Name yours. -->
 
-### `label_one`
+The community is Hacker News comment threads. The three labels sort a comment
+by **what it offers in support of its claim** — not by tone, and not by whether
+the claim is correct.
 
-**Definition:**
+### `anecdote`
 
-**Example 1:**
->
-
-**Example 2:**
->
-
-### `label_two`
-
-**Definition:**
+**Definition:** Argues from the writer's own experience, which no other reader
+can check.
 
 **Example 1:**
->
+> My daughter, when she pointed something out to me on my laptop screen, ALWAYS
+> touched the screen from the time she could walk. When she was a teenager I
+> asked her repeatedly to please stop touching the screen when she pointed
+> something out, but I gave up.
 
 **Example 2:**
+> I have the same M1/16GB on newest macos, that thing still flies.
 >
+> My work device is an M4/32GB. The difference doesnt feel that big, especially
+> when you code mostly with agents.
+
+### `citation`
+
+**Definition:** Argues from something external and checkable — a date, a
+figure, a named source, a quote, a document anyone can go and read.
+
+**Example 1:**
+> Yes, the developer documentation used to publish the string until May 2026,
+> when Anthropic removed it and removed the feature from the API. Sonnet's
+> explanation was correct, just out of date
+
+**Example 2:**
+> "We've done tons of user testing on this, and it turns out, it doesn't work.
+> Touch surfaces don't want to be vertical. It gives great demos. But after a
+> short period of time, you start to fatigue, and after an extended period of
+> time, your arm wants to fall off. It's ergonomically terrible."
+> —Jobs
+
+### `assertion`
+
+**Definition:** States a claim confidently and offers no evidence of either
+kind. Reasoning is not evidence.
+
+**Example 1:**
+> Take a closer look at your own previous comment. Aside from stubbornly
+> declaring "AI bad!", what you described there is market behavior. Markets can
+> not be ignored.
+
+**Example 2:**
+> "racing cars" actually would not be stationary. "Race cars" are the class of
+> vehicle, which can be stationary. If the cars are racing, they are not
+> stationary.
+>
+> "High-speed" is ambiguous. It can be used to describe the class of vehicle,
+> or it can be used to describe the state of motion of the vehicle.
 
 ### The hardest boundary
 
-**Which two labels:**
+**Which two labels:** `anecdote` vs `citation`.
+
+Both carry something that looks like evidence, and on Hacker News the two
+arrive in the same sentence constantly — a commenter reports a personal
+experience and attaches a real number to it. *"I bought mine in March and the
+equivalent is now 50% more expensive, from 5000 to 7500"* has a date, two
+prices and a percentage in it, and is still one person's purchase.
 
 **The decision rule I used every time:**
-<!-- e.g. "If the post names a specific checkable fact, it's `analysis`, even
-     if the tone is heated." -->
+
+> **Could another reader check this without taking the writer's word for it?**
+> If yes, `citation`. If no, `anecdote` — however specific the numbers are.
+
+Two consequences I applied consistently:
+
+- A number about the writer's own life or setup is **not** a citation. Five
+  years in production, a measured build time, the price they personally paid:
+  all `anecdote`, because the only source is the writer.
+- Pointing at a checkable artifact **is** a citation even in the first person.
+  A commenter writing *"there's a lot more detail in the README"* about their
+  own project is `citation`, because the README is a thing I can go and read.
+
+When a comment does both — a personal story plus a genuinely external fact —
+I used rule 4 from the staff set as the tie-break and took whichever the
+comment spends most of its words on.
 
 
 
