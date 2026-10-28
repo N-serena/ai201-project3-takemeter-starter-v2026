@@ -51,63 +51,94 @@ whether you hit them:
 
 ---
 
-## 1.
-
-<!-- Your criterion. It must name a number. -->
-
-
+## 1. Overall accuracy of at least 0.60 on the held-out split
 
 **Why this target:**
 
+Criterion 3 caps my largest label at 45% of the data, so a model that ignores
+the text entirely and always guesses `anecdote` scores about 0.45. 0.60 is the
+first number that is clearly better than that rather than indistinguishable
+from it.
 
+I did not go higher, because criterion 3's 240 rows leave 168 for training, and
+at batch 16 over 3 epochs that is roughly 30 optimizer steps. I expect an
+undertrained model, and the honest target is the one I would call useful, not
+the one that flatters the setup.
 
 ---
 
-## 2.
-
-<!-- Your criterion. -->
-
-
+## 2. `anecdote` and `assertion` each reach an F1 of at least 0.55, and `citation` at least 0.30
 
 **Why this target:**
 
+The two numbers differ on purpose. A 300-comment sample of the live feed read
+roughly 39% `anecdote`, 27% `assertion` and 18% `citation`, so `citation` is my
+smallest label even after I weight collection toward the technical threads where
+it is densest.
 
+Under criterion 3 it lands about 9 posts in the test split against 16 for
+`anecdote`. One post changing hands moves an F1 computed on 9 posts by about
+0.1, so holding `citation` to the same target as the others would be measuring
+which seed I drew. 0.55 where there are enough posts to hold still, 0.30 where
+there are not.
 
 ---
 
-## 3.
-
-<!-- Your criterion. -->
-
-
+## 3. At least 240 labelled posts, with no label above 45% and none below 25%
 
 **Why this target:**
 
+Three numbers doing one job: keeping every label's test split big enough to
+score.
 
+The brief's own cap is 70%, which I would clear without trying and which still
+lets a majority-class guesser reach 0.70. 45% holds that guesser to 0.45, which
+is what makes criterion 1 mean anything.
+
+The 25% floor and the 240 rows are the part that costs me work. 200 rows puts
+30 posts in the test split — 7 for my smallest label, under the 8 the notebook
+warns about, and only 9 and 13 for the other two. 240 rows with a 25% floor
+puts at least 9 in the smallest and 16 in the largest. That is 40 posts of extra
+labelling to stop next unit's three-seed spread from being dominated by one post
+changing hands.
+
+Checkable before I train anything, and it cannot move between seeds.
 
 ---
 
-## 4.
-
-<!-- Your criterion. -->
-
-
+## 4. I agree with the staff labels on at least 21 of the 30 posts
 
 **Why this target:**
 
+`data/staff_taxonomy.md` says a rate in the 70s is normal and expected on that
+set, so 21/30 is the course's own stated baseline rather than a number I chose
+because it was safe.
 
+It belongs here because it is the only criterion that tests *me* rather than the
+model. My hardest boundary asks whether another reader could check a claim
+without taking the writer's word for it. If I cannot apply someone else's
+written rule consistently across 30 posts, I have no grounds for claiming I
+applied my own consistently across 240. Like criterion 3, it does not move
+between seeds.
 
 ---
 
-## 5.
-
-<!-- Your criterion. -->
-
-
+## 5. Mean confidence on correct predictions is at least 0.05 above mean confidence on wrong ones
 
 **Why this target:**
 
+`results.json` reports this directly, as `mean_when_right` and
+`mean_when_wrong`.
 
+I deliberately did not write this against `accuracy_most_confident_third`, the
+other confidence number in that file. With a 36-post test split each third is
+12 posts, so a gap target there shifts by about 0.08 every time one post changes
+hands — it would measure the seed. The means use every post in the split.
+
+0.05 sounds small and it is the right size. If fine-tuning on 168 examples
+collapses the model toward one label, its confidence will be flat and the gap
+will sit near zero. This tests whether confidence carries any information at
+all, which on this much data is a genuinely open question.
 
 ---
 
