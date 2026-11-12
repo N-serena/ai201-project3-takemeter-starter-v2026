@@ -33,11 +33,47 @@ for _stream in (sys.stdout, sys.stderr):
     except (AttributeError, OSError, ValueError):
         pass
 
-LABELS = ["anecdote", "checkable", "assertion"]
+OWN_LABELS = ["anecdote", "checkable", "assertion"]
+OWN_DEFS = {
+    "anecdote": "Recounts a particular incident, about anyone, from any perspective, that nobody else can verify.",
+    "checkable": "Rests on something a reader could verify: a named fact, figure, date, document, event or rule. No link required.",
+    "assertion": "No incident, and nothing a reader could check. Opinion, preference, habit, prediction, argument.",
+}
+OWN_RULE = """
+    <blockquote>Could another reader check this without taking the writer's word for it? If yes, <b>checkable</b>. If not, does it recount a particular incident? Then <b>anecdote</b>. If it is neither, <b>assertion</b>.</blockquote>
+    <ul>
+      <li>A link is not required. A named law, a public event, a product's documented behaviour, a video everyone in the thread has seen: all <b>checkable</b>, supplied source or not.</li>
+      <li>But it has to be named specifically enough to check. "Studies show" and "everyone knows" name nothing, so they stay <b>assertion</b>.</li>
+      <li>An anecdote can be about anyone, told from any perspective. It is not a first-person label.</li>
+      <li>A preference is not an incident. "Laptops only, thanks" and "I always collapse the top comment" are a taste and a habit, so both are <b>assertion</b>.</li>
+    </ul>"""
+
+# The staff set is labelled under somebody else's taxonomy, copied from
+# data/staff_taxonomy.md. Applying a rule you did not write, the way its
+# authors did, is the whole point of the exercise.
+STAFF_LABELS = ["analysis", "hot_take", "reaction"]
+STAFF_DEFS = {
+    "analysis": "Makes an argument backed by a specific, checkable fact. The fact has to do work in the argument.",
+    "hot_take": "A confident claim with no support offered. It might be true. It isn't argued. Strength of feeling is not support.",
+    "reaction": "An immediate response to something that just happened. Feeling rather than argument, usually in the last few hours.",
+}
+STAFF_RULE = """
+    <blockquote>These are the staff's rules, not yours. Apply them as written, even where your own taxonomy would say otherwise.</blockquote>
+    <ul>
+      <li><b>analysis vs hot_take</b> &mdash; does the fact carry the argument? If the number is decoration on a conclusion already reached, it is a <b>hot_take</b> with a statistic in it.</li>
+      <li><b>reaction vs hot_take</b> &mdash; is it about a claim or about the writer? <b>reaction</b> reports what just happened to the writer; <b>hot_take</b> asserts something general about the world. Heat alone does not decide it.</li>
+      <li><b>reaction vs analysis</b> &mdash; recency does not outrank evidence. A post written minutes after a race is still <b>analysis</b> if it argues from a checkable fact.</li>
+      <li>When two are still defensible, pick the one the post spends most of its words on. A tie-break, not a licence.</li>
+    </ul>"""
 
 BATCHES = [
-    ("cold", "Cold 20", "cold_batch.csv", False),
-    ("prelabelled", "Pre-labelled 220", "batch_prelabelled.csv", True),
+    {"key": "cold", "title": "Cold 20", "source": "cold_batch.csv", "suggests": False,
+     "labels": OWN_LABELS, "definitions": OWN_DEFS, "rule": OWN_RULE, "band": True},
+    {"key": "prelabelled", "title": "Pre-labelled 220", "source": "batch_prelabelled.csv",
+     "suggests": True, "labels": OWN_LABELS, "definitions": OWN_DEFS, "rule": OWN_RULE,
+     "band": True},
+    {"key": "staff", "title": "Staff 30", "source": "data/staff_posts.csv", "suggests": False,
+     "labels": STAFF_LABELS, "definitions": STAFF_DEFS, "rule": STAFF_RULE, "band": False},
 ]
 
 TEMPLATE = r"""<title>Evidence Labeller</title>
@@ -53,9 +89,9 @@ TEMPLATE = r"""<title>Evidence Labeller</title>
     --line: #dde3e9;
     --accent: #3d5a80;
     --tint: rgba(61, 90, 128, 0.09);
-    --anecdote: #6b4fbb;
-    --checkable: #16676c;
-    --assertion: #a8512f;
+    --l1: #6b4fbb;
+    --l2: #16676c;
+    --l3: #a8512f;
     --ok: #1d6b45;
     --warn: #9a5b12;
     color-scheme: light;
@@ -69,9 +105,9 @@ TEMPLATE = r"""<title>Evidence Labeller</title>
       --line: #2b323b;
       --accent: #8fb0d8;
       --tint: rgba(143, 176, 216, 0.14);
-      --anecdote: #ad92e9;
-      --checkable: #5ec2c6;
-      --assertion: #e38d69;
+      --l1: #ad92e9;
+      --l2: #5ec2c6;
+      --l3: #e38d69;
       --ok: #6cc294;
       --warn: #dcac5e;
       color-scheme: dark;
@@ -85,9 +121,9 @@ TEMPLATE = r"""<title>Evidence Labeller</title>
     --line: #2b323b;
     --accent: #8fb0d8;
     --tint: rgba(143, 176, 216, 0.14);
-    --anecdote: #ad92e9;
-    --checkable: #5ec2c6;
-    --assertion: #e38d69;
+    --l1: #ad92e9;
+    --l2: #5ec2c6;
+    --l3: #e38d69;
     --ok: #6cc294;
     --warn: #dcac5e;
     color-scheme: dark;
@@ -358,18 +394,12 @@ TEMPLATE = r"""<title>Evidence Labeller</title>
   <div class="panel">
     <h2>Label balance, this batch</h2>
     <div class="dist" id="dist"></div>
-    <p class="note">The shaded band is 25–45%, the window criterion 3 asks every label to land in.</p>
+    <p class="note" id="bandnote">The shaded band is 25-45%, the window criterion 3 asks every label to land in.</p>
   </div>
 
   <details class="ref">
-    <summary>The decision rule</summary>
-    <blockquote>Could another reader check this without taking the writer's word for it? If yes, <b>checkable</b>. If not, does it recount a particular incident? Then <b>anecdote</b>. If it is neither, <b>assertion</b>.</blockquote>
-    <ul>
-      <li>A link is not required. A named law, a public event, a product's documented behaviour, a video everyone in the thread has seen: all <b>checkable</b>, supplied source or not.</li>
-      <li>But it has to be named specifically enough to check. "Studies show" and "everyone knows" name nothing, so they stay <b>assertion</b>.</li>
-      <li>An anecdote can be about anyone, told from any perspective. It is not a first-person label.</li>
-      <li>A preference is not an incident. "Laptops only, thanks" and "I always collapse the top comment" are a taste and a habit, so both are <b>assertion</b>.</li>
-    </ul>
+    <summary id="rulesummary">The decision rule</summary>
+    <div id="rule"></div>
   </details>
 
   <div class="panel done" id="done" hidden>
@@ -385,9 +415,10 @@ TEMPLATE = r"""<title>Evidence Labeller</title>
   "use strict";
 
   var DATA = JSON.parse(document.getElementById("posts").textContent);
-  var LABELS = DATA.labels;
-  var DEFS = DATA.definitions;
   var BATCHES = DATA.batches;
+  // Each batch carries its own taxonomy: the staff 30 are labelled under the
+  // staff set's three labels, not this project's.
+  var drawnFor = null;
 
   var labels = Object.create(null);   // post id -> label
   var store = null;                   // db namespace, when it arrives
@@ -410,13 +441,17 @@ TEMPLATE = r"""<title>Evidence Labeller</title>
     done: document.getElementById("done"),
     donenote: document.getElementById("donenote"),
     csv: document.getElementById("csv"),
-    card: document.getElementById("card")
+    card: document.getElementById("card"),
+    rule: document.getElementById("rule"),
+    rulesummary: document.getElementById("rulesummary"),
+    bandnote: document.getElementById("bandnote")
   };
 
   function batch(key) {
     for (var i = 0; i < BATCHES.length; i++) if (BATCHES[i].key === key) return BATCHES[i];
     return BATCHES[0];
   }
+  function labelsFor() { return batch(current).labels; }
   function posts() { return batch(current).posts; }
   function post() { return posts()[index[current]] || null; }
 
@@ -452,13 +487,15 @@ TEMPLATE = r"""<title>Evidence Labeller</title>
     });
   }
 
-  function buildKeys() {
-    LABELS.forEach(function (name, i) {
+  // Rebuilt whenever the batch changes, because each batch has its own labels.
+  function buildKeys(b) {
+    el.keys.textContent = "";
+    b.labels.forEach(function (name, i) {
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "key";
       btn.id = "key-" + name;
-      btn.style.setProperty("--hue", "var(--" + name + ")");
+      btn.style.setProperty("--hue", "var(--l" + (i + 1) + ")");
       var h = document.createElement("span");
       h.className = "key-name";
       var cap = document.createElement("span");
@@ -468,18 +505,27 @@ TEMPLATE = r"""<title>Evidence Labeller</title>
       h.appendChild(document.createTextNode(name));
       var d = document.createElement("span");
       d.className = "key-def";
-      d.textContent = DEFS[name];
+      d.textContent = b.definitions[name];
       btn.appendChild(h);
       btn.appendChild(d);
       btn.addEventListener("click", function () { assign(name); });
       el.keys.appendChild(btn);
     });
+    // Our own constant markup, built at generation time, not viewer content.
+    el.rule.innerHTML = b.rule;
+    el.rulesummary.textContent = b.key === "staff"
+      ? "The staff set's rules (not yours)"
+      : "The decision rule";
+    el.bandnote.hidden = !b.band;
+    drawnFor = b.key;
   }
 
   function render() {
     var b = batch(current);
     var list = b.posts;
     var p = post();
+
+    if (drawnFor !== b.key) buildKeys(b);
 
     Array.prototype.forEach.call(el.modes.children, function (btn) {
       btn.setAttribute("aria-selected", btn.id === "mode-" + current ? "true" : "false");
@@ -544,33 +590,39 @@ TEMPLATE = r"""<title>Evidence Labeller</title>
   }
 
   function renderDist(list) {
+    var showBand = batch(current).band;
     var labelled = list.filter(function (p) { return labels[p.id]; });
     el.dist.textContent = "";
-    LABELS.forEach(function (name) {
+    labelsFor().forEach(function (name, idx) {
       var n = labelled.filter(function (p) { return labels[p.id] === name; }).length;
       var share = labelled.length ? n / labelled.length : 0;
 
       var row = document.createElement("div");
       row.className = "row";
-      row.style.setProperty("--hue", "var(--" + name + ")");
+      row.style.setProperty("--hue", "var(--l" + (idx + 1) + ")");
 
       var nm = document.createElement("b");
       nm.textContent = name;
 
       var bar = document.createElement("div");
       bar.className = "bar";
-      var band = document.createElement("span");
-      band.className = "band";
+      if (showBand) {
+        var band = document.createElement("span");
+        band.className = "band";
+        bar.appendChild(band);
+      }
       var fill = document.createElement("span");
       fill.className = "fill";
       fill.style.width = (share * 100).toFixed(1) + "%";
-      bar.appendChild(band);
       bar.appendChild(fill);
 
       var v = document.createElement("span");
       v.className = "verdict";
       if (!labelled.length) {
         v.textContent = "-";
+      } else if (!showBand) {
+        // The staff set has no balance target: criterion 3 is about my corpus.
+        v.textContent = n + "  " + (share * 100).toFixed(0) + "%";
       } else {
         var inBand = share >= 0.25 && share <= 0.45;
         v.classList.add(inBand ? "in" : "out");
@@ -661,7 +713,7 @@ TEMPLATE = r"""<title>Evidence Labeller</title>
 
     if (ev.key === "1" || ev.key === "2" || ev.key === "3") {
       ev.preventDefault();
-      assign(LABELS[Number(ev.key) - 1]);
+      assign(labelsFor()[Number(ev.key) - 1]);
     } else if (ev.key === "Enter") {
       var p = post();
       if (p && batch(current).suggests && p.suggested) { ev.preventDefault(); assign(p.suggested); }
@@ -676,7 +728,7 @@ TEMPLATE = r"""<title>Evidence Labeller</title>
 
   // ---- start
   buildModes();
-  buildKeys();
+  buildKeys(batch(current));
   var local = cache(false);
   if (local) { labels = local; }
   render();
@@ -748,15 +800,19 @@ def main():
     args = ap.parse_args()
 
     batches = []
-    for key, title, source, suggests in BATCHES:
-        rows = read(source)
+    for spec in BATCHES:
+        rows = read(spec["source"])
         if not rows:
-            print(f"[warn] {source} is missing or empty, skipping that batch")
+            print(f"[warn] {spec['source']} is missing or empty, skipping that batch")
             continue
         batches.append({
-            "key": key,
-            "title": title,
-            "suggests": suggests,
+            "key": spec["key"],
+            "title": spec["title"],
+            "suggests": spec["suggests"],
+            "labels": spec["labels"],
+            "definitions": spec["definitions"],
+            "rule": spec["rule"],
+            "band": spec["band"],
             "posts": [
                 {
                     "id": r["id"],
@@ -766,20 +822,13 @@ def main():
                 for r in rows
             ],
         })
-        print(f"  {title}: {len(rows)} posts from {source}")
+        print(f"  {spec['title']}: {len(rows)} posts from {spec['source']} "
+              f"({'/'.join(spec['labels'])})")
 
     if not batches:
         sys.exit("No batches found. Run make_batch.py first.")
 
-    payload = {
-        "labels": LABELS,
-        "definitions": {
-            "anecdote": "Recounts a particular incident, about anyone, from any perspective, that nobody else can verify.",
-            "checkable": "Rests on something a reader could verify: a named fact, figure, date, document, event or rule. No link required.",
-            "assertion": "No incident, and nothing a reader could check. Opinion, preference, habit, prediction, argument.",
-        },
-        "batches": batches,
-    }
+    payload = {"batches": batches}
 
     # `<` escaped so no post can close the script tag early.
     blob = json.dumps(payload, ensure_ascii=False).replace("<", "\\u003c")
