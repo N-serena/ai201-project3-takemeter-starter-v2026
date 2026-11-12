@@ -378,141 +378,285 @@ Claude also wrote `collect_hn.py`, `make_batch.py` and `make_label_page.py`.
 ---
 
 ## Baseline vs. Trained
-
-<!-- Both models on the same posts. `python baseline.py --trained results.json`
-     prints this table for you. -->
-
 | Measure | Baseline | Trained | Difference |
 |---|---|---|---|
-| Overall accuracy |  |  |  |
-| Macro F1 |  |  |  |
-| F1 — `label_one` |  |  |  |
-| F1 — `label_two` |  |  |  |
+| Overall accuracy | 0.389 | 0.500 | +0.111 |
+| Macro F1 | 0.190 | 0.347 | +0.156 |
+| F1 - `anecdote` | 0.000 | 0.000 | +0.000 |
+| F1 - `checkable` | 0.571 | 0.541 | -0.031 |
+| F1 - `assertion` | 0.000 | 0.500 | +0.500 |
+
+Both columns are seed 42, scored on the same 36 held-out posts in
+`test_split.csv`. `facebook/bart-large-mnli`, prompted with the definitions in
+`label_definitions.txt`.
 
 **What I predicted before I looked:**
-<!-- Milestone 1 asks you to write this BEFORE seeing the trained numbers. A
-     prediction made afterwards isn't one. -->
+
+Nothing, and I am not going to invent one. `RUNNING.md` lists two commands so
+that you see the baseline alone, write a prediction, and only then reveal the
+Trained column. I ran `baseline.py --trained results.json` in a single pass and
+saw both columns together, so any prediction I wrote now would be written after
+the fact. Milestone 1 asks for one made beforehand. I would rather lose the
+point than fake it.
 
 **What the gap actually means:**
-<!-- If the baseline matched your trained model, your fine-tuning added
-     nothing — and that is a real finding, not a failure. Say it plainly. -->
 
+Fine-tuning on 168 examples beat the zero-shot baseline by 11 points of
+accuracy and 16 of macro F1, so it did something real. The whole of that gain
+is one label: `assertion` went from 0.000 to 0.500. `checkable` got slightly
+worse. `anecdote` is 0.000 in both, because neither model ever predicts it.
 
+Two things qualify the win.
+
+The baseline is a weak opponent. Always guessing `checkable`, the largest label
+in the test split, scores 17/36 = 0.472, which beats the zero-shot model's
+0.389. My trained model's 0.500 is only one post better than that trivial
+guesser. Against a real baseline rather than the designated one, the
+fine-tuning bought almost nothing.
+
+And the baseline's zero on `assertion` is probably my fault rather than the
+model's. The definitions are the prompt, and `assertion` is the one I wrote
+negatively: *recounts no incident and rests on nothing a reader could check*. A
+zero-shot entailment model scores how well a text entails each definition, and
+a definition built out of absences is very hard to entail. That is a claim
+about my prompt, not about the task, and it is testable: rewriting `assertion`
+positively and re-running the baseline would settle it.
 
 ---
 
 ## Run Log — Before
-
-<!-- Five criteria across three seeds. The notebook's section 6 prints the
-     spread table; the Target and Verdict columns are yours. -->
-
 | Criterion | Target | Seed 42 | Seed 7 | Seed 2024 | Verdict |
 |---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |
+| 1. Overall accuracy | >= 0.60 | 0.500 | 0.583 | 0.667 | MISSED |
+| 2. `anecdote` F1 | >= 0.55 | 0.000 | 0.000 | 0.000 | MISSED |
+| 2. `assertion` F1 | >= 0.55 | 0.500 | 0.606 | 0.643 | MISSED |
+| 2. `checkable` F1 | >= 0.30 | 0.541 | 0.611 | 0.732 | MET |
+| 3. Every label 25-45% of 240 rows | 25-45% | 7.1 / 47.1 / 45.8 | same | same | MISSED |
+| 4. Agree with staff on 21 of 30 | >= 21 | 13 | same | same | MISSED |
+| 5. Confidence gap | >= 0.05 | 0.018 | 0.002 | 0.004 | MISSED |
+
+Criteria 3 and 4 do not vary by seed: one is a fact about the dataset, the
+other about me.
+
+Macro F1 across the three seeds was 0.347, 0.406 and 0.458. Accuracy moved
+**0.167** between the best and worst seed, which the notebook flags as more
+than 10 points and calls a diagnosis in its own right.
+
+That spread is the single most important number in this run log. Criterion 1's
+target is 0.60. Seed 2024 returned 0.667 and would have met it. Seed 42
+returned 0.500. Had I run one seed and stopped, I would have believed either
+that I comfortably met the criterion or that I badly missed it, depending
+entirely on the draw.
+
+---
 
 ### Confusion matrix
+Seed 42, the first of the three.
 
-<!-- ⚠️ TYPED AS A MARKDOWN TABLE. The notebook prints one ready to paste.
-     An image of a matrix earns nothing. -->
-
-| true \ predicted |  |  |  |
+| true \ predicted | anecdote | checkable | assertion |
 |---|---|---|---|
-| **** |  |  |  |
-| **** |  |  |  |
-| **** |  |  |  |
+| **anecdote** | 0 | 2 | 1 |
+| **checkable** | 0 | 10 | 7 |
+| **assertion** | 0 | 8 | 8 |
 
 **My biggest off-diagonal number, and what it means:**
-<!-- Not "the model made mistakes" — WHICH boundary it didn't learn, and which
-     direction. "7 real analysis posts were called hot_take and only 3 went the
-     other way" is a direction, not just an error rate. -->
 
+8 real `assertion` posts were called `checkable`, against 7 real `checkable`
+posts called `assertion`. That is close to symmetric, so by the notebook's own
+reading the model finds the pair hard in both directions rather than leaning
+one way.
 
+The more striking feature is the column that is entirely zero. The model never
+predicted `anecdote` once, on any of the three seeds. It did not learn the
+label badly; it did not learn it at all, and with 17 examples in the corpus and
+3 in the test split there was never much chance it would.
+
+The symmetry matters for the diagnosis below, because my own labelling of that
+same pair was *not* symmetric.
 
 ---
 
 ## Verdicts and Diagnoses
-
-<!-- MET or MISSED against LAST UNIT's target. The target has to hold across
-     all three seeds, not turn up sometimes. -->
-
 | # | Criterion | Target | Verdict | How I decided |
 |---|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-| 4 |  |  |  |  |
-| 5 |  |  |  |  |
+| 1 | Overall accuracy | >= 0.60 | MISSED | 0.500 / 0.583 / 0.667. Has to hold on all three seeds; it holds on one |
+| 2 | `anecdote` and `assertion` F1 >= 0.55, `checkable` >= 0.30 | see left | MISSED | `checkable` met on all three. `assertion` fails on seed 42. `anecdote` is 0.000 everywhere |
+| 3 | 240 rows, every label 25-45% | 25-45% | MISSED | 7.1 / 47.1 / 45.8. Not seed-dependent |
+| 4 | Agree with staff on 21 of 30 | >= 21 | MISSED | 13 of 30, or 11 of the 27 I labelled blind |
+| 5 | Confidence gap >= 0.05 | >= 0.05 | MISSED | 0.018 / 0.002 / 0.004 |
 
 **Diagnoses**
 
-<!-- For each miss: the cause, and how you know. The four common causes are:
-     too few examples for a label, a boundary you applied inconsistently, a
-     genuinely hard label pair, and a task the model can't reach from this
-     much data.
+**Criterion 2, `anecdote` F1 of 0.000: too few examples for a label.** The
+clearest and least interesting miss. `anecdote` is 17 of 240 posts, 3 of them
+in the test split. The model predicted it zero times across three seeds. No
+amount of training fixes a label the corpus barely contains.
 
-     ⚠️ Use your agreement report as evidence. It is the only instrument you
-     have that can tell a LABELLING problem from a MODEL problem, and this
-     section is graded on whether you used it that way. -->
+The cause is upstream of the model. `anecdote` started at about 50 posts under
+a definition that said *the writer's own experience*. When I corrected it to
+what the word actually means, a particular incident recounted, 33 posts left
+and the label collapsed. Hacker News comments are overwhelmingly argument and
+opinion; recounted incidents are rare there. The taxonomy is sound and the
+corpus cannot support it.
 
+**Criterion 1 and the 0.167 spread: a dataset too small to measure with.** 36
+test posts means one post is worth 2.8 points of accuracy. The gap between my
+best and worst seed is six posts. The criterion is not so much missed as
+unmeasurable at this sample size, and that applies to every per-label F1 too.
 
+**Criterion 5, confidence gap of 0.018: the model is guessing.** Mean
+confidence was 0.398 when right and 0.389 when wrong, against a 1-in-3 prior.
+When I wrote this criterion I said 0.05 was the right size because *if
+fine-tuning on 168 examples collapses the model toward one label, its
+confidence will be flat and the gap will sit near zero*. That is what happened.
+The criterion did its job: it detected a collapsed model rather than a
+calibrated one.
+
+**Criterion 4, and what the agreement report says about criteria 1 and 2: a
+labelling problem, not only a model problem.**
+
+This is the diagnosis the agreement report earns, and it points at my labels
+rather than at DistilBERT.
+
+I agreed with staff on 13 of 30, or 11 of the 27 I labelled blind. The brief
+says a rate in the 70s is normal on that set. Mine is in the 40s.
+
+Ten of my seventeen disagreements are a single pair, `hot_take` versus
+`reaction`, and on that pair my labels are indistinguishable from chance: 8
+right, 10 wrong, split evenly in both directions. Staff rule 2 covers that
+boundary explicitly, in one sentence. I did not apply it. I read the label
+names instead, taking `reaction` to mean responding to the thread and
+`hot_take` to mean a heated outburst, which is why I called *"Got up at 5,
+drove ninety minutes, and it's cancelled"* a `hot_take` and *"Nobody actually
+enjoys the long run"* a `reaction`. Both are backwards under the written rule.
+
+Now connect that to my own corpus. My confusion matrix confuses `checkable`
+and `assertion` almost symmetrically, 8 against 7, which on its own suggests a
+genuinely hard boundary. But my own labelling of that same pair was
+systematically directional: six of the eight corrections I made during the
+sample gate moved posts one way, into `checkable`. A hard boundary produces
+symmetric model errors. A boundary where the labeller drifts one way produces
+directional label noise. I have both, which means the `checkable` / `assertion`
+F1 scores are measuring a mixture of a hard task and inconsistent labels, and
+I cannot separate the two from the matrix alone.
+
+The staff set is the evidence that tips it. If I can be at chance on somebody
+else's explicitly written rule across 30 posts, I have no grounds for assuming
+I was consistent across my own 240, of which 168 I never reviewed at all.
+
+**What I am not claiming.** The agreement rate does not prove my own labels are
+40% wrong. The staff taxonomy is not mine, and the one boundary I failed on
+there, `hot_take` versus `reaction`, has no direct equivalent in my three
+labels. What it does establish is that my ability to apply a written rule
+consistently is much weaker than I assumed when I wrote mine.
 
 ---
 
 ## Agreement Report
+**Agreement rate:** 13 / 30 = 43%
 
-<!-- Your rate against the staff set, and every disagreement adjudicated.
+Three of the 30 are compromised: their staff labels were visible to me before I
+labelled, through my own carelessness in inspecting the answer file. I agreed
+on two of those three. **On the 27 I labelled blind the rate is 11 / 27 = 41%**,
+and that is the number I would stand behind.
 
-     Remember you labelled these 30 under the STAFF taxonomy in
-     data/staff_taxonomy.md, not your own — so every argument below is made
-     from those definitions and those decision rules. -->
+**Where the disagreements fall**
 
-**Agreement rate:** ___ / 30 = ___%
-
-<!-- Nobody grades this number. A 60% who argues every disagreement from the
-     stated rules beats a 95% who wrote "staff was right" nine times. Several
-     of the 30 were chosen because they're genuinely ambiguous — you should be
-     winning some of these. -->
+| Pair | Count |
+|---|---|
+| `hot_take` vs `reaction` | 10 |
+| `analysis` vs `hot_take` | 4 |
+| `analysis` vs `reaction` | 3 |
 
 **Disagreements**
 
-<!-- Three lines each: the post, both labels, and who you think is right and
-     why — grounded in the staff definitions you were both applying.
+**Group 1, pile (a): the `hot_take` / `reaction` boundary, 10 posts.**
+`sp_013`, `sp_016`, `sp_017`, `sp_019`, `sp_020` are general claims about the
+world with no support offered, which staff called `hot_take` and I called
+`reaction`. `sp_022`, `sp_024`, `sp_025`, `sp_029`, `sp_030` report something
+that just happened to the writer, which staff called `reaction` and I called
+`hot_take`.
 
-     Then sort each into one of three piles:
-       (a) the rule covered it and I applied it loosely → a consistency problem
-       (b) the rule genuinely doesn't say               → a gap in the definitions
-       (c) the rule is ambiguous here and my reading is defensible → argue it.
-           This is a legitimate win.
+> *Staff said / I said:* `hot_take` / `reaction` for *"Nobody actually enjoys
+> the long run. They enjoy having done it."*
+>
+> *My call, and why:* staff are right, and it is not close. Rule 2 asks whether
+> the post is about a claim or about the writer. That sentence asserts
+> something general about everyone who runs. It is a `hot_take`.
 
-     Pile (a) is the one that matters most for your diagnosis: if you applied a
-     written rule two different ways on 30 posts, that is direct evidence about
-     what you did across your own 200. -->
+> *Staff said / I said:* `reaction` / `hot_take` for *"Got up at 5, drove
+> ninety minutes, and it's cancelled. Standing in the car park in the rain
+> reading the email."*
+>
+> *My call, and why:* staff are right. Nothing general is claimed. It reports
+> the writer's last hour and how it felt, which is the definition of
+> `reaction`.
 
-**1.**
-> *The post:*
->
-> *Staff said / I said:*
->
-> *My call, and why:*
->
-> *Which pile:*
+*Which pile:* (a) for all ten. The rule covered every one of them and I applied
+it by label name instead of by definition.
 
-**2.**
-> *The post:*
+**Group 2, pile (a): rule 1, 2 posts.**
+
+> *Staff said / I said:* `hot_take` / `analysis` for `sp_014`, *"Times are down
+> about 3% since the shoe rules changed, so obviously the shoes are the whole
+> story and the sport has a problem."*
 >
-> *Staff said / I said:*
+> *My call, and why:* staff are right, and this one is embarrassing. It is
+> almost verbatim the worked example in `data/staff_taxonomy.md` under rule 1.
+> The 3% is decoration on a conclusion already reached, and *"obviously"* and
+> *"the whole story"* are the tells. A `hot_take` with a statistic in it.
+
+`sp_023` is the other: staff `reaction`, mine `analysis`. The post contains a
+comparison, *"slower than my warm-up used to be"*, but the comparison carries
+no argument. The post is about not minding. Staff are right. Pile (a).
+
+**Group 3, pile (b): where "checkable" is not defined, 3 posts.**
+
+This is the one I would argue, and it is the same hole I found in my own
+taxonomy in unit 5.
+
+> *The posts:* `sp_005`, *"My times dropped 2% in the shoes and another 2% the
+> following year in the same pair, when the only thing that changed was going
+> from 35 to 50 miles a week."* `sp_007`, the same loop run in 4C and 24C.
+> `sp_010`, three runners in different shoes within 10 seconds of each other.
 >
-> *My call, and why:*
+> *Staff said / I said:* `analysis` for all three; I said `hot_take`,
+> `reaction` and `reaction`.
 >
-> *Which pile:*
+> *My call, and why:* staff's own definition says `analysis` is *"an argument
+> backed by a specific, checkable fact"*. None of these three facts is checkable
+> by a reader. They are the writer's own runs, their own heart rate, their own
+> training log, and nobody else can verify any of it. Compare `sp_003` (a
+> scoring rule changed in 2019) and `sp_009` (a course remeasured in 2021),
+> which staff also call `analysis` and which anyone can check. The staff
+> taxonomy uses "checkable" to mean two different things and never says which.
+>
+> I do not think my labels on these three were right either. `reaction` is
+> wrong under rule 3, which says recency does not outrank evidence. The honest
+> position is that the staff taxonomy has no slot for an argument from personal
+> data, in exactly the way mine had no slot for a verifiable claim with no
+> source supplied, which is what forced me to rename `citation` to `checkable`.
+>
+> *Which pile:* (b). The rule genuinely does not say.
+
+**The remaining 2 posts**, `sp_003` and `sp_009`, I called `hot_take` where
+staff said `analysis`. Both state a specific public fact that carries the
+argument. Staff are right, pile (a).
 
 **What the pattern in my disagreements tells me:**
 
+Thirteen of seventeen are pile (a), and most of those are one boundary I never
+really read. That is a consistency problem, not a disagreement about meaning,
+and it is direct evidence about how I labelled my own 240.
 
+The three in pile (b) are more interesting, and they say something I did not
+expect: the staff taxonomy has the same structural flaw mine did. "Checkable"
+is ambiguous between *a reader can verify it* and *a specific fact is stated*,
+and staff resolve it inconsistently across their own answer key. I found that
+hole in my own definitions by labelling 20 posts blind and disagreeing with
+myself. I found it in theirs the same way. Neither taxonomy survived contact
+with 30 real posts unchanged, which is probably the most useful thing this
+project has taught me.
 
 ---
 
