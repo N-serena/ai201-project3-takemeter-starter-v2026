@@ -661,41 +661,126 @@ project has taught me.
 ---
 
 ## The Improvement
-
 **What I changed:**
+
+I merged `anecdote` into `assertion` and renamed the result `unverifiable`,
+retraining on two labels instead of three. `labels_after.csv` holds the merged
+corpus, 113 `checkable` against 127 `unverifiable`. `labels.csv` is untouched,
+so both runs stay reproducible.
+
+I renamed rather than folding `anecdote` into `assertion` under that name,
+because an anecdote is not an assertion and calling it one would repeat exactly
+the naming mistake that cost me the first agreement gate. Both labels are the
+"no" branch of my own decision rule, which asks first whether a reader could
+check the claim. `unverifiable` says that and nothing more.
+
+Nothing else changed. Same base model, same 3 epochs, same learning rate, same
+batch size, same seeds.
 
 **Which diagnosis pointed at it:**
 
-### Run Log — After
+The first one: too few examples for a label. `anecdote` was 17 of 240 posts and
+3 of 36 test posts, and the model predicted it zero times across three seeds.
+The fix had to be upstream of the training loop, because no amount of training
+recovers a label the corpus barely contains.
 
+I chose it over the alternatives because it is falsifiable. If accuracy jumped
+toward 0.70, the starved label was dragging the model. If it stayed near 0.55,
+the remaining boundary is genuinely hard and my labels on it are noisy. Either
+answer is worth having. Raising `EPOCHS` would have told me nothing: 33
+optimiser steps is not what 17 examples is suffering from.
+
+---
+
+### Run Log — After
 | Criterion | Target | Seed 42 | Seed 7 | Seed 2024 | Verdict |
 |---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |
+| 1. Overall accuracy | >= 0.60 | 0.667 | 0.639 | 0.639 | MET, see caveat |
+| 2. `checkable` F1 | >= 0.30 | 0.667 | 0.519 | 0.435 | MET |
+| 2. `anecdote` / `assertion` F1 | >= 0.55 | n/a | n/a | n/a | labels no longer exist |
+| 3. Every label 25-45% | 25-45% | 47 / 53 | same | same | MISSED, and now moot |
+| 4. Agree with staff on 21 of 30 | >= 21 | 13 | same | same | MISSED, unaffected |
+| 5. Confidence gap | >= 0.05 | 0.021 | 0.040 | 0.022 | MISSED |
+
+| Measure | Seed 42 | Seed 7 | Seed 2024 | Spread |
+|---|---|---|---|---|
+| Overall accuracy | 0.667 | 0.639 | 0.639 | **0.028** |
+| Macro F1 | 0.667 | 0.615 | 0.585 | 0.082 |
+| F1 - `checkable` | 0.667 | 0.519 | 0.435 | 0.232 |
+| F1 - `unverifiable` | 0.667 | 0.711 | 0.735 | 0.068 |
 
 **Did it help, and how do I know:**
 
-<!-- If it didn't, say so. Relabelling that didn't help is a genuinely
-     interesting result and earns full credit. -->
+Yes, but not in the way the accuracy column suggests, and the honest answer
+needs three comparisons rather than one.
 
+**The accuracy gain is mostly arithmetic.** Mean accuracy went from 0.583 to
+0.648. But dropping a label also raises the floor: a majority-class guesser
+scored 0.472 on the three-label test split and 0.528 on the two-label one. The
+model's margin over that guesser was +0.111 before and is +0.120 after.
+Essentially unchanged. Criterion 1 is now met on all three seeds, and I am not
+going to claim it: the target was written for a three-label task and comparing
+a two-label accuracy against it is not like for like.
 
+**The stability gain is real and large.** Accuracy spread across seeds fell
+from **0.167 to 0.028**. The notebook's own verdict flipped from *"your dataset
+is too small or too lopsided for a stable measure"* to *"stable enough to
+trust"*. That is the actual result. Before the change I could not have called
+any criterion either way, because a different seed moved accuracy by nearly 17
+points. Now I can.
+
+**The label that survived got worse.** `checkable` F1 averaged 0.628 before and
+0.540 after, and its spread widened from 0.191 to 0.232. Its definition did not
+change and neither did which posts carry it. So the merge did not clean up the
+`checkable` boundary; it removed a label nobody could predict, which made the
+overall number steadier without making the remaining distinction any easier.
+
+Put together: the starved label was the main source of my instability, not the
+main source of my error. The error lives in the `checkable` boundary, and the
+agreement report says a good part of it lives in my labels rather than in the
+model.
 
 ---
 
 ## What's Still Broken
+**Criterion 5, the confidence gap, is still missed** at 0.021, 0.040 and 0.022
+against a target of 0.05. The model's confidence still carries almost no
+information about whether it is right. I would not attack this next: on 36 test
+posts the gap itself is barely measurable, and a model this close to its prior
+has no calibration to recover.
 
-<!-- For each criterion still missed: what you'd do, and why you stopped. -->
+**Criterion 4, agreement with staff, is untouched by anything I did to the
+model,** because it is not about the model. 13 of 30, and 10 of my 17
+disagreements sit on one boundary whose rule I never properly read. The fix is
+to re-label the staff 30 under rule 2 applied deliberately, and then to go back
+through my own corpus looking for the same failure. I stopped because that is a
+labelling pass, not an experiment, and it would not have fitted in this unit.
 
+**Criterion 3 is missed and now moot.** The two-label corpus is 47/53, which no
+longer has three labels to balance. The three-label version was 7.1 / 47.1 /
+45.8 and the only honest fix was collecting several hundred more posts to find
+enough recounted incidents. I decided that against the value of having one.
 
+**168 labels, 70% of the corpus, are still unreviewed.** That is the largest
+single piece of unfinished work in the project, and every number above inherits
+whatever error is in them. The sample gate puts my agreement with those labels
+somewhere between 70% and 92%, and the residual disagreements point one
+direction, so the likely error is systematic rather than random: too few posts
+called `checkable`.
 
 **The gap between what I meant my labels to capture and what the model
 learned:**
-<!-- Two sentences. Your confusion matrix is the evidence. -->
 
+I meant the labels to capture what a claim rests on, and the model learned
+roughly half of that: it can separate checkable claims from unverifiable ones
+about two thirds of the time, and it never learned the distinction between an
+unverifiable incident and an unverifiable opinion at all. The confusion matrix
+shows the second cut failing completely, with `anecdote` predicted zero times
+across six training runs, and the first cut failing symmetrically, 8 posts one
+way against 7 the other, which is what a genuinely hard boundary looks like
+when the labels on it are also inconsistent.
 
+---
 
 <!-- ═════════════════════════════════════════════════════════════════════
 
