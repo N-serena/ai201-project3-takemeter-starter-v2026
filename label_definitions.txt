@@ -3,9 +3,9 @@
 # Copy these from your README so the baseline is judged on exactly the
 # definitions you wrote. baseline.py reads this file.
 #
-# Hacker News comments, sorted by what each one offers in support of its claim.
-# The hardest boundary is anecdote vs citation; the rule is in the README.
+# Hacker News comments, sorted by what each one rests on. The test is whether
+# a reader could check the claim without taking the writer's word for it.
 
-anecdote: argues from the writer's own experience, which no other reader can check
-citation: argues from something external and checkable, such as a date, a figure, a named source, a quote, or a document anyone can go and read
-assertion: states a claim confidently and offers no evidence of either kind
+anecdote: rests on the writer's own experience, where the only source is the writer
+checkable: rests on something a reader could go and verify, such as a named fact, figure, date, document, quote, event or rule, named specifically enough that a reader would know what to check
+assertion: rests on nothing a reader could check and no experience either, such as an opinion, a prediction, an analogy, or an argument from reasoning alone

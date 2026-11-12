@@ -55,13 +55,13 @@
      people leave out. Every taxonomy has a hardest boundary. Name yours. -->
 
 The community is Hacker News comment threads. The three labels sort a comment
-by **what it offers in support of its claim** — not by tone, and not by whether
-the claim is correct.
+by **what its claim rests on** — not by tone, and not by whether the claim is
+correct.
 
 ### `anecdote`
 
-**Definition:** Argues from the writer's own experience, which no other reader
-can check.
+**Definition:** Rests on the writer's own experience, where the only source is
+the writer.
 
 **Example 1:**
 > My daughter, when she pointed something out to me on my laptop screen, ALWAYS
@@ -75,10 +75,11 @@ can check.
 > My work device is an M4/32GB. The difference doesnt feel that big, especially
 > when you code mostly with agents.
 
-### `citation`
+### `checkable`
 
-**Definition:** Argues from something external and checkable — a date, a
-figure, a named source, a quote, a document anyone can go and read.
+**Definition:** Rests on something a reader could go and verify — a named fact,
+figure, date, document, quote, event or rule — named specifically enough that a
+reader would know what to check.
 
 **Example 1:**
 > Yes, the developer documentation used to publish the string until May 2026,
@@ -86,16 +87,18 @@ figure, a named source, a quote, a document anyone can go and read.
 > explanation was correct, just out of date
 
 **Example 2:**
-> "We've done tons of user testing on this, and it turns out, it doesn't work.
-> Touch surfaces don't want to be vertical. It gives great demos. But after a
-> short period of time, you start to fatigue, and after an extended period of
-> time, your arm wants to fall off. It's ergonomically terrible."
-> —Jobs
+> It is illegal to download copyrighted material from a website and make copies
+> of it in violation of its licence. I can't go scrape New York Times articles
+> and make copies of them without first licensing them from NYT.
+
+<!-- Example 2 supplies no link and still counts. That is the point of the
+     label, and the reason it is not called `citation`. -->
 
 ### `assertion`
 
-**Definition:** States a claim confidently and offers no evidence of either
-kind. Reasoning is not evidence.
+**Definition:** Rests on nothing a reader could check, and on no experience
+either — an opinion, a prediction, an analogy, or an argument from reasoning
+alone.
 
 **Example 1:**
 > Take a closer look at your own previous comment. Aside from stubbornly
@@ -112,34 +115,40 @@ kind. Reasoning is not evidence.
 
 ### The hardest boundary
 
-**Which two labels:** `anecdote` vs `citation`.
+**Which two labels:** `checkable` vs `assertion`.
 
-Both carry something that looks like evidence, and on Hacker News the two
-arrive in the same sentence constantly — a commenter reports a personal
-experience and attaches a real number to it. *"I bought mine in March and the
-equivalent is now 50% more expensive, from 5000 to 7500"* has a date, two
-prices and a percentage in it, and is still one person's purchase.
+I found this one the hard way. My first taxonomy called the middle label
+`citation` and required the writer to supply a source — a link, a quote, a named
+document. Labelling 20 posts blind showed why that fails: a claim like
+*"it is illegal to download copyrighted material"* names no source, but copyright
+law is a real thing a reader can go and look up. It is not `anecdote`, because
+no personal experience is involved. And it cannot be `assertion`, because that
+label means *nothing to check* — and there plainly is something to check.
+
+Three labels that did not cover the space. So the label is now `checkable`, and
+the question is about the claim rather than about the writer's manners.
 
 **The decision rule I used every time:**
 
 > **Could another reader check this without taking the writer's word for it?**
-> If yes, `citation`. If no, `anecdote` — however specific the numbers are.
+> If yes, `checkable`. If the only source is the writer, `anecdote`. If there is
+> nothing to check at all, `assertion`.
 
-Two consequences I applied consistently:
+Three consequences I applied consistently:
 
-- A number about the writer's own life or setup is **not** a citation. Five
+- **A link is not required.** A named law, a public event, a product's
+  documented behaviour, a video everyone in the thread has seen: all
+  `checkable`, supplied source or not.
+- **But it must be named specifically enough to check.** *"Studies show"* and
+  *"everyone knows"* name nothing, so they stay `assertion`. The test is whether
+  a reader would know where to go.
+- **A number about the writer's own life or setup is still `anecdote`.** Five
   years in production, a measured build time, the price they personally paid:
-  all `anecdote`, because the only source is the writer.
-- Pointing at a checkable artifact **is** a citation even in the first person.
-  A commenter writing *"there's a lot more detail in the README"* about their
-  own project is `citation`, because the README is a thing I can go and read.
+  the only source is the writer, however precise the figure.
 
-When a comment does both — a personal story plus a genuinely external fact —
-I used rule 4 from the staff set as the tie-break and took whichever the
-comment spends most of its words on.
-
-
-
+When a comment does both — a personal story plus a genuinely checkable fact — I
+used rule 4 from the staff set as the tie-break and took whichever the comment
+spends most of its words on.
 ---
 
 ## The Dataset

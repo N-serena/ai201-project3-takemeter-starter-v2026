@@ -67,18 +67,18 @@ the one that flatters the setup.
 
 ---
 
-## 2. `anecdote` and `assertion` each reach an F1 of at least 0.55, and `citation` at least 0.30
+## 2. `anecdote` and `assertion` each reach an F1 of at least 0.55, and `checkable` at least 0.30
 
 **Why this target:**
 
 The two numbers differ on purpose. A 300-comment sample of the live feed read
-roughly 39% `anecdote`, 27% `assertion` and 18% `citation`, so `citation` is my
+roughly 39% `anecdote`, 27% `assertion` and 18% `checkable`, so `checkable` is my
 smallest label even after I weight collection toward the technical threads where
 it is densest.
 
 Under criterion 3 it lands about 9 posts in the test split against 16 for
 `anecdote`. One post changing hands moves an F1 computed on 9 posts by about
-0.1, so holding `citation` to the same target as the others would be measuring
+0.1, so holding `checkable` to the same target as the others would be measuring
 which seed I drew. 0.55 where there are enough posts to hold still, 0.30 where
 there are not.
 
