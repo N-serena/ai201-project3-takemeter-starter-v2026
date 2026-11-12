@@ -84,7 +84,7 @@ def main():
             writer.writerow({"id": row["id"], "text": row["text"],
                              "label": "", "note": args.note})
 
-    print(f"wrote {args.out} — {args.n} posts, label column empty")
+    print(f"wrote {args.out} - {args.n} posts, label column empty")
     print(f"  drawn from {len(available)} unlabelled of {len(pool)} in the pool")
     print(f"  seed {args.seed}, note {args.note!r}")
     return 0

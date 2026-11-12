@@ -1,4 +1,4 @@
-# Acceptance criteria — TakeMeter
+# Acceptance criteria - TakeMeter
 
 Five criteria that say what "working" means for this classifier, written in
 unit 5 **before** anything was trained.
@@ -11,7 +11,7 @@ opinion. *"Every label has an F1 of at least 0.60 on the held-out set"* is a
 criterion.
 
 Under each, write a sentence or two on **why that number**. A reason that says
-something about your data or your taxonomy earns credit — *"I picked 0.60 F1
+something about your data or your taxonomy earns credit, *"I picked 0.60 F1
 for `reaction` because it's my smallest label and I only have about 50
 examples of it"*. A reason that could be attached to any project does not.
 
@@ -27,7 +27,7 @@ about 33%, so a target of 0.40 is barely a target. Your number should sit
 somewhere you'd honestly call useful.
 
 **Cover at least three of these five areas.** They're here as prompts, not as a
-form to fill in — a criterion that fits none of them is fine if it names a
+form to fill in - a criterion that fits none of them is fine if it names a
 number.
 
 | Area | A question it could answer |
@@ -47,7 +47,7 @@ whether you hit them:
   your biggest label, and saying so is a good reason.
 - **Unit 6 tests across three seeds, and the target has to hold across all
   three.** A target of 0.65 against results of 0.71, 0.62, 0.68 is a **miss**.
-  Pick with that in mind — it is stricter than it first sounds.
+  Pick with that in mind - it is stricter than it first sounds.
 
 ---
 
@@ -96,7 +96,7 @@ lets a majority-class guesser reach 0.70. 45% holds that guesser to 0.45, which
 is what makes criterion 1 mean anything.
 
 The 25% floor and the 240 rows are the part that costs me work. 200 rows puts
-30 posts in the test split — 7 for my smallest label, under the 8 the notebook
+30 posts in the test split - 7 for my smallest label, under the 8 the notebook
 warns about, and only 9 and 13 for the other two. 240 rows with a 25% floor
 puts at least 9 in the smallest and 16 in the largest. That is 40 posts of extra
 labelling to stop next unit's three-seed spread from being dominated by one post
@@ -133,7 +133,7 @@ between seeds.
 I deliberately did not write this against `accuracy_most_confident_third`, the
 other confidence number in that file. With a 36-post test split each third is
 12 posts, so a gap target there shifts by about 0.08 every time one post changes
-hands — it would measure the seed. The means use every post in the split.
+hands - it would measure the seed. The means use every post in the split.
 
 0.05 sounds small and it is the right size. If fine-tuning on 168 examples
 collapses the model toward one label, its confidence will be flat and the gap
@@ -143,7 +143,7 @@ all, which on this much data is a genuinely open question.
 ---
 
 <!-- ─────────────────────────────────────────────────────────────────────────
-     UNIT 6 — read this before you change anything above.
+     UNIT 6 - read this before you change anything above.
 
      If a criterion turns out to be BROKEN rather than merely unmet, you can
      revise it, and that earns credit. But never delete or edit the original

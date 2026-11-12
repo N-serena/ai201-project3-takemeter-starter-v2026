@@ -538,7 +538,7 @@ TEMPLATE = r"""<title>Evidence Labeller</title>
     el.done.hidden = !all;
     if (all) {
       el.donenote.textContent = "All " + list.length + " labelled. They are saved in the artifact's store"
-        + (store ? "." : " only in this tab — the store never answered, so copy them out.");
+        + (store ? "." : " only in this tab - the store never answered, so copy them out.");
       el.csv.value = csvFor(list);
     }
   }
@@ -570,7 +570,7 @@ TEMPLATE = r"""<title>Evidence Labeller</title>
       var v = document.createElement("span");
       v.className = "verdict";
       if (!labelled.length) {
-        v.textContent = "—";
+        v.textContent = "-";
       } else {
         var inBand = share >= 0.25 && share <= 0.45;
         v.classList.add(inBand ? "in" : "out");
@@ -607,7 +607,7 @@ TEMPLATE = r"""<title>Evidence Labeller</title>
       var code = (err && err.code) || "unavailable";
       setStatus("not saved: " + code);
       if (code === "invalid_argument") {
-        banner("The store refused the write. Your labels are in this tab only — copy them out when you finish.");
+        banner("The store refused the write. Your labels are in this tab only - copy them out when you finish.");
       }
     });
   }
@@ -686,7 +686,7 @@ TEMPLATE = r"""<title>Evidence Labeller</title>
   var timer = setTimeout(function () {
     if (settled) return;
     setStatus("store not reachable");
-    banner("The label store has not answered. You can keep labelling — the page holds them in this tab — but copy them out before you close it.");
+    banner("The label store has not answered. You can keep labelling - the page holds them in this tab - but copy them out before you close it.");
   }, 10000);
 
   if (window.claude && window.claude.use) {
@@ -751,7 +751,7 @@ def main():
     for key, title, source, suggests in BATCHES:
         rows = read(source)
         if not rows:
-            print(f"[warn] {source} is missing or empty — skipping that batch")
+            print(f"[warn] {source} is missing or empty, skipping that batch")
             continue
         batches.append({
             "key": key,

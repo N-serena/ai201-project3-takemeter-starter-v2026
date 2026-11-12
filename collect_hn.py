@@ -65,7 +65,7 @@ def clean(raw):
     return re.sub(r"\s+", " ", text).strip()
 
 
-#   The API serves at most 1000 hits per query — nbPages comes back as 10 and
+#   The API serves at most 1000 hits per query - nbPages comes back as 10 and
 #   page 10 onward is empty. One sweep of the recent feed therefore tops out
 #   around 160 posts once the per-story cap has taken its share. The way past
 #   it is time windows: each window is a separate query with its own 1000-hit
@@ -91,7 +91,7 @@ def sweep_once(base, query, numeric_filters, pages, min_words, max_words, label)
         try:
             data = fetch_page(base, page, query, numeric_filters)
         except Exception as exc:  # noqa: BLE001
-            print(f"[warn] page {page} failed ({exc}) — stopping this sweep")
+            print(f"[warn] page {page} failed ({exc}), stopping this sweep")
             break
         hits = data.get("hits", [])
         if not hits:
