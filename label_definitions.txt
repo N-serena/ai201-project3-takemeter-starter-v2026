@@ -3,9 +3,10 @@
 # Copy these from your README so the baseline is judged on exactly the
 # definitions you wrote. baseline.py reads this file.
 #
-# Hacker News comments, sorted by what each one rests on. The test is whether
-# a reader could check the claim without taking the writer's word for it.
+# Hacker News comments, sorted by what each one rests on. The first test is
+# whether a reader could check the claim without taking the writer's word for
+# it; the second is whether it recounts something that happened.
 
-anecdote: rests on the writer's own experience, where the only source is the writer
+anecdote: recounts a particular incident, whoever it happened to and whoever is telling it, that a reader cannot independently verify
 checkable: rests on something a reader could go and verify, such as a named fact, figure, date, document, quote, event or rule, named specifically enough that a reader would know what to check
-assertion: rests on nothing a reader could check and no experience either, such as an opinion, a prediction, an analogy, or an argument from reasoning alone
+assertion: recounts no incident and rests on nothing a reader could check, such as an opinion, a preference, a habit, a prediction, or an argument from reasoning alone

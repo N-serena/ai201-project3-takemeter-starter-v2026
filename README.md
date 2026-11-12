@@ -60,8 +60,8 @@ correct.
 
 ### `anecdote`
 
-**Definition:** Rests on the writer's own experience, where the only source is
-the writer.
+**Definition:** Recounts a particular incident — whoever it happened to,
+whoever is telling it — that a reader cannot independently verify.
 
 **Example 1:**
 > My daughter, when she pointed something out to me on my laptop screen, ALWAYS
@@ -70,10 +70,13 @@ the writer.
 > something out, but I gave up.
 
 **Example 2:**
-> I have the same M1/16GB on newest macos, that thing still flies.
->
-> My work device is an M4/32GB. The difference doesnt feel that big, especially
-> when you code mostly with agents.
+> All I can tell you is of the last 10 I tried, all games from the last 10
+> years, 8 run perfectly fine under Wine on Mac, and 2 of the older ones with a
+> custom inhouse engine for only that game, run perfectly fine after telling an
+> agent to make it work.
+
+<!-- Example 2 is full of numbers and still `anecdote`: the run happened once,
+     to one person, and nobody else can repeat it. -->
 
 ### `checkable`
 
@@ -131,10 +134,11 @@ the question is about the claim rather than about the writer's manners.
 **The decision rule I used every time:**
 
 > **Could another reader check this without taking the writer's word for it?**
-> If yes, `checkable`. If the only source is the writer, `anecdote`. If there is
-> nothing to check at all, `assertion`.
+> If yes, `checkable`. If not, does it recount a particular incident? Then
+> `anecdote`. If it is neither — an opinion, a preference, a habit, a
+> prediction, an argument — `assertion`.
 
-Three consequences I applied consistently:
+Four consequences I applied consistently:
 
 - **A link is not required.** A named law, a public event, a product's
   documented behaviour, a video everyone in the thread has seen: all
@@ -142,9 +146,13 @@ Three consequences I applied consistently:
 - **But it must be named specifically enough to check.** *"Studies show"* and
   *"everyone knows"* name nothing, so they stay `assertion`. The test is whether
   a reader would know where to go.
-- **A number about the writer's own life or setup is still `anecdote`.** Five
-  years in production, a measured build time, the price they personally paid:
-  the only source is the writer, however precise the figure.
+- **An anecdote can be about anyone, told from any perspective.** It is not a
+  first-person label. A story about a colleague, told in the third person, is
+  as much an `anecdote` as one about the writer.
+- **A preference is not an incident.** *"Laptops only for that kind of work,
+  thanks"* and *"I always collapse the top comment"* report a taste and a habit,
+  not something that happened, so both are `assertion`. This is the consequence
+  that moved the most posts, and the one I got wrong first time round.
 
 When a comment does both — a personal story plus a genuinely checkable fact — I
 used rule 4 from the staff set as the tie-break and took whichever the comment

@@ -363,11 +363,12 @@ TEMPLATE = r"""<title>Evidence Labeller</title>
 
   <details class="ref">
     <summary>The decision rule</summary>
-    <blockquote>Could another reader check this without taking the writer's word for it? If yes, <b>checkable</b>. If the only source is the writer, <b>anecdote</b>. If there is nothing to check at all, <b>assertion</b>.</blockquote>
+    <blockquote>Could another reader check this without taking the writer's word for it? If yes, <b>checkable</b>. If not, does it recount a particular incident? Then <b>anecdote</b>. If it is neither, <b>assertion</b>.</blockquote>
     <ul>
       <li>A link is not required. A named law, a public event, a product's documented behaviour, a video everyone in the thread has seen: all <b>checkable</b>, supplied source or not.</li>
       <li>But it has to be named specifically enough to check. "Studies show" and "everyone knows" name nothing, so they stay <b>assertion</b>.</li>
-      <li>A number about the writer's own life or setup is still <b>anecdote</b>, however precise the figure. The only source is the writer.</li>
+      <li>An anecdote can be about anyone, told from any perspective. It is not a first-person label.</li>
+      <li>A preference is not an incident. "Laptops only, thanks" and "I always collapse the top comment" are a taste and a habit, so both are <b>assertion</b>.</li>
     </ul>
   </details>
 
@@ -773,9 +774,9 @@ def main():
     payload = {
         "labels": LABELS,
         "definitions": {
-            "anecdote": "Rests on the writer's own experience. The only source is the writer.",
+            "anecdote": "Recounts a particular incident, about anyone, from any perspective, that nobody else can verify.",
             "checkable": "Rests on something a reader could verify: a named fact, figure, date, document, event or rule. No link required.",
-            "assertion": "Rests on nothing a reader could check, and no experience either. Opinion, prediction, analogy, reasoning alone.",
+            "assertion": "No incident, and nothing a reader could check. Opinion, preference, habit, prediction, argument.",
         },
         "batches": batches,
     }
